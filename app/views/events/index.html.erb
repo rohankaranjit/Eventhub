@@ -1,0 +1,14 @@
+<h1>All Events</h1>
+
+<% if current_user.organizer? %>
+  <%= link_to "Create New Event", new_event_path %>
+<% end %>
+
+<ul>
+  <% @events.each do |event| %>
+    <li>
+      <%= link_to event.title, event_path(event) %>
+      | <%= event.start_date.strftime("%b %d, %Y") %> to <%= event.end_date.strftime("%b %d, %Y") %>
+    </li>
+  <% end %>
+</ul>
