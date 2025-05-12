@@ -1,0 +1,24 @@
+<div class="container mt-4">
+  <h1 class="mb-4">My Registered Events</h1>
+
+  <% if @events.any? %>
+    <div class="row">
+      <% @events.each do |event| %>
+        <div class="col-md-6 col-lg-4 mb-4">
+          <div class="card shadow-sm h-100">
+            <div class="card-body">
+              <h5 class="card-title"><%= link_to event.title, event_path(event), class: "text-decoration-none" %></h5>
+              <p class="card-text text-muted">
+                <%= event.start_date.strftime("%b %d, %Y") %> to 
+                <%= event.end_date.strftime("%b %d, %Y") %>
+              </p>
+              <%= button_to "Cancel Registration", cancel_event_path(event), method: :delete, data: { turbo: false }, class: "btn btn-danger btn-sm" %>
+            </div>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  <% else %>
+    <div class="alert alert-info">You haven't registered for any events yet.</div>
+  <% end %>
+</div>

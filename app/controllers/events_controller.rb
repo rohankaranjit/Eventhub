@@ -16,10 +16,13 @@ class EventsController < ApplicationController
 
   def create
     @event = current_user.events.build(event_params)
+    @event.price = params[:event][:price].to_f * 100  # Convert dollars to cents
+
     if @event.save
       redirect_to @event, notice: "Event created successfully!"
     else
-      render :new, alert: "Something went wrong."
+      flash.now[:alert] = "Something went wrong."
+      render :new
     end
   end
 
@@ -35,8 +38,12 @@ class EventsController < ApplicationController
   end
 
   def destroy
-    @event.destroy
-    redirect_to events_path, notice: "Event deleted."
+    if current_user.admin? || @event.user == current_user
+      @event.destroy
+      redirect_to events_path, notice: "Event deleted."
+    else
+      redirect_to events_path, alert: "You are not allowed to delete this event."
+    end
   end
 
   private
@@ -46,12 +53,12 @@ class EventsController < ApplicationController
   end
 
   def authorize_organizer!
-    unless current_user.organizer?
-      redirect_to root_path, alert: "Only organizers can do that."
+    unless current_user.organizer? || current_user.admin?
+      redirect_to root_path, alert: "Access denied."
     end
-  end
+  end  
 
   def event_params
-    params.require(:event).permit(:title, :description, :start_date, :end_date, :capacity)
+    params.require(:event).permit(:title, :description, :start_date, :end_date, :capacity, :image, :price)
   end
 end

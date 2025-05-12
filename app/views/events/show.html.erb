@@ -1,2 +1,39 @@
-<h1>Events#show</h1>
-<p>Find me in app/views/events/show.html.erb</p>
+<div class="container mt-4">
+  <div class="card shadow-sm">
+    <div class="card-body">
+      <h1 class="card-title"><%= @event.title %></h1>
+
+      <% if @event.image.attached? %>
+        <%= image_tag @event.image, class: "img-fluid rounded mb-3", style: "max-height: 300px;" %>
+      <% end %>
+
+      <p class="card-text"><%= @event.description %></p>
+
+      <ul class="list-group list-group-flush mb-3">
+        <li class="list-group-item"><strong>From:</strong> <%= @event.start_date.strftime("%b %d, %Y %l:%M %p") %></li>
+        <li class="list-group-item"><strong>To:</strong> <%= @event.end_date.strftime("%b %d, %Y %l:%M %p") %></li>
+        <li class="list-group-item"><strong>Capacity:</strong> <%= @event.capacity %></li>
+        <li class="list-group-item"><strong>Price:</strong> <%= @event.price.nil? || @event.price == 0 ? "Free" : "$#{@event.price / 100}" %></li>
+      </ul>
+
+      <div class="d-flex flex-wrap gap-2">
+        <% if current_user&.regular_user? %>
+          <% if @event.attendees.include?(current_user) %>
+            <%= button_to "Cancel Registration", cancel_event_path(@event), method: :delete, class: "btn btn-danger" %>
+          <% elsif @event.capacity <= @event.reservations.count %>
+            <span class="text-danger fw-bold">This event is fully booked.</span>
+          <% elsif @event.price.nil? || @event.price == 0 %>
+            <%= button_to "Register for Free", register_event_path(@event), method: :post, class: "btn btn-success" %>
+          <% else %>
+            <%= button_to "Buy Ticket for $#{@event.price / 100}", event_payments_path(@event), method: :post, data: { turbo: false }, class: "btn btn-primary" %>
+          <% end %>
+        <% end %>
+
+        <% if current_user&.admin? || (current_user&.organizer? && @event.user == current_user) %>
+          <%= link_to "Edit", edit_event_path(@event), class: "btn btn-warning" %>
+          <%= button_to "Delete", event_path(@event), method: :delete, data: { confirm: "Are you sure?" }, class: "btn btn-outline-danger" %>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>
